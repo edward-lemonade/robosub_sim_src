@@ -5,17 +5,18 @@ from launch.actions import DeclareLaunchArgument, OpaqueFunction
 
 
 def launch_setup(context, *args, **kwargs):
-	robosub_arguments = (
+	robosub_bridge_arguments = (
 		[
 			"/robosub/camera/image@sensor_msgs/msg/Image@gz.msgs.Image",
 			"/robosub/camera/simulated_image@sensor_msgs/msg/Image@gz.msgs.Image",
 			"/robosub/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
+			"/gazebo/set_entity_pose@gz.msgs.EntityPose@ros_gz_interfaces/srv/SetEntityPose"
 		]
 	)
 	robosub_bridge = Node(
 		package="ros_gz_bridge",
 		executable="parameter_bridge",
-		arguments=robosub_arguments,
+		arguments=robosub_bridge_arguments,
 		output="screen",
 	)
 
@@ -31,7 +32,13 @@ def launch_setup(context, *args, **kwargs):
 		output="screen",
 	)
 
-	return [robosub_bridge, movement, keyInput]
+	dataGen = Node(
+		package="data_generation",
+		executable="mainloop",
+		output="screen",
+	)
+
+	return [robosub_bridge, movement, keyInput, dataGen]
 
 
 def generate_launch_description():
