@@ -10,7 +10,8 @@ def launch_setup(context, *args, **kwargs):
 			"/robosub/camera/image@sensor_msgs/msg/Image@gz.msgs.Image",
 			"/robosub/camera/simulated_image@sensor_msgs/msg/Image@gz.msgs.Image",
 			"/robosub/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
-			"/gazebo/set_entity_pose@gz.msgs.EntityPose@ros_gz_interfaces/srv/SetEntityPose"
+			"/world/pool/set_entity_pose@ros_gz_interfaces.srv.SetEntityPose_Request",
+			"/world/pool/set_pose@robot_localization.srv.SetPose_Request",
 		]
 	)
 	robosub_bridge = Node(
@@ -38,7 +39,8 @@ def launch_setup(context, *args, **kwargs):
 		output="screen",
 	)
 
-	return [robosub_bridge, movement, keyInput, dataGen]
+	return [dataGen]
+	#return [robosub_bridge, movement, keyInput]
 
 
 def generate_launch_description():

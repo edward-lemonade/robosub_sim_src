@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 
 from geometry_msgs.msg import Pose, Point, Quaternion
+from robot_localization import SetPose
 from ros_gz_interfaces.srv import SetEntityPose
 from ros_gz_interfaces.msg import Entity
 from sensor_msgs.msg import Image
@@ -22,26 +23,33 @@ class MainLoop(Node):
 		self.image_sub = self.create_subscription(Image, '/robosub/camera/simulated_image', self.image_callback, 10)
 		self.bridge = CvBridge()
 
-		self.pose_client = None
-		self.timer = self.create_timer(1.0, self.init_pose_client)
+		#self.pose_client = self.create_client(SetEntityPose, '/world/pool/set_entity_pose')
+		self.pose_client = self.create_client(SetPose, '/world/pool/set_pose')
+		while not self.pose_client.wait_for_service(timeout_sec=1.0):
+			continue
+		self.create_timer(0.5, self.move_model_entitypose)
+		self.get_logger().info('Pose client ready')
 
-	def init_pose_client(self):
-		if not self.pose_client:
-			self.pose_client = self.create_client(SetEntityPose, '/gazebo/set_entity_pose')
-		if self.pose_client.wait_for_service(timeout_sec=1.0):
-			self.get_logger().info('Pose client ready')
-			self.create_timer(0.5, self.move_model)
-			self.timer = None
-		else:
-			self.get_logger().info('Still waiting...')
-
-	def move_model(self):
+	def move_model_entitypose(self):
 		pose = Pose()
 		pose.position = Point(x=random.uniform(-5, 5), y=random.uniform(-5, 5), z=random.uniform(0, 2))
 		q = self.random_quaternion()
 		pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
 		request = SetEntityPose.Request()
+		request.entity = Entity(name='high_level_robosub')
+		request.pose = pose
+
+		self.pose_client.call_async(request)
+		self.get_logger().info(f'Moved model to position {pose.position} and orientation {pose.orientation}')
+		
+	def move_model_pose(self):
+		pose = Pose()
+		pose.position = Point(x=random.uniform(-5, 5), y=random.uniform(-5, 5), z=random.uniform(0, 2))
+		q = self.random_quaternion()
+		pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+
+		request = SetPose.Request()
 		request.entity = Entity(name='high_level_robosub')
 		request.pose = pose
 
