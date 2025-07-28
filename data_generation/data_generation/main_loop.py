@@ -37,9 +37,12 @@ class MainLoop(Node):
 		pose.position = Point(x=random.uniform(-5, 5), y=random.uniform(-5, 5), z=random.uniform(0, 2))
 		pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
+		entity = Entity()
+		entity.name = "high_level_robosub"
+
 		request = SetEntityPose.Request()
-		request.name = "high_level_robosub"
 		request.pose = pose
+		request.entity = entity
 
 		self.pose_client.call_async(request)
 		self.get_logger().info(f'Moved model to position {pose.position} and orientation {pose.orientation}')
