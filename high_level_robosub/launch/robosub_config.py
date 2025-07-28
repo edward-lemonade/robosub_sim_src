@@ -38,7 +38,7 @@ def launch_setup(context, *args, **kwargs):
 		output="screen",
 	)
 
-	return [robosub_bridge]
+	return [robosub_bridge, dataGen]
 	#return [robosub_bridge, movement, keyInput]
 
 

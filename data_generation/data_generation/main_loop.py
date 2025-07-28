@@ -30,27 +30,15 @@ class MainLoop(Node):
 		self.create_timer(0.5, self.move_model_pose)
 		self.get_logger().info('Pose client ready')
 
-	def move_model_entitypose(self):
-		pose = Pose()
-		pose.position = Point(x=random.uniform(-5, 5), y=random.uniform(-5, 5), z=random.uniform(0, 2))
-		q = self.random_quaternion()
-		pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
-
-		request = SetEntityPose.Request()
-		request.entity = Entity(name='high_level_robosub')
-		request.pose = pose
-
-		self.pose_client.call_async(request)
-		self.get_logger().info(f'Moved model to position {pose.position} and orientation {pose.orientation}')
-		
 	def move_model_pose(self):
 		q = self.random_quaternion()
 
 		pose = Pose()
 		pose.position = Point(x=random.uniform(-5, 5), y=random.uniform(-5, 5), z=random.uniform(0, 2))
 		pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
-		pose.name = "high_level_robosub"
-		request = SetPose.Request()
+
+		request = SetEntityPose.Request()
+		request.name = "high_level_robosub"
 		request.pose = pose
 
 		self.pose_client.call_async(request)
