@@ -7,11 +7,10 @@ from launch.actions import DeclareLaunchArgument, OpaqueFunction
 def launch_setup(context, *args, **kwargs):
 	robosub_bridge_arguments = (
 		[
+			"/world/pool/set_pose@ros_gz_interfaces/srv/SetEntityPose@gz.msgs.Pose@gz.msgs.Boolean",
 			"/robosub/camera/image@sensor_msgs/msg/Image@gz.msgs.Image",
 			"/robosub/camera/simulated_image@sensor_msgs/msg/Image@gz.msgs.Image",
 			"/robosub/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
-			"/world/pool/set_entity_pose@ros_gz_interfaces.srv.SetEntityPose_Request",
-			"/world/pool/set_pose@robot_localization.srv.SetPose_Request",
 		]
 	)
 	robosub_bridge = Node(
@@ -39,7 +38,7 @@ def launch_setup(context, *args, **kwargs):
 		output="screen",
 	)
 
-	return [dataGen]
+	return [robosub_bridge]
 	#return [robosub_bridge, movement, keyInput]
 
 

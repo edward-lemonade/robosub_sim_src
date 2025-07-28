@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 
 from geometry_msgs.msg import Pose, Point, Quaternion
-from robot_localization import SetPose
+
 from ros_gz_interfaces.srv import SetEntityPose
 from ros_gz_interfaces.msg import Entity
 from sensor_msgs.msg import Image
@@ -20,14 +20,14 @@ class MainLoop(Node):
 		super().__init__('mainloop')
 
 		self.model_name = 'high_level_robosub'  # Set your Gazebo model name
-		self.image_sub = self.create_subscription(Image, '/robosub/camera/simulated_image', self.image_callback, 10)
 		self.bridge = CvBridge()
 
-		#self.pose_client = self.create_client(SetEntityPose, '/world/pool/set_entity_pose')
-		self.pose_client = self.create_client(SetPose, '/world/pool/set_pose')
+		self.image_sub = self.create_subscription(Image, '/robosub/camera/simulated_image', self.image_callback, 10)
+
+		self.pose_client = self.create_client(SetEntityPose, '/world/pool/set_pose')
 		while not self.pose_client.wait_for_service(timeout_sec=1.0):
-			continue
-		self.create_timer(0.5, self.move_model_entitypose)
+			self.get_logger().info('Waiting...')
+		self.create_timer(0.5, self.move_model_pose)
 		self.get_logger().info('Pose client ready')
 
 	def move_model_entitypose(self):
@@ -44,13 +44,13 @@ class MainLoop(Node):
 		self.get_logger().info(f'Moved model to position {pose.position} and orientation {pose.orientation}')
 		
 	def move_model_pose(self):
+		q = self.random_quaternion()
+
 		pose = Pose()
 		pose.position = Point(x=random.uniform(-5, 5), y=random.uniform(-5, 5), z=random.uniform(0, 2))
-		q = self.random_quaternion()
 		pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
-
+		pose.name = "high_level_robosub"
 		request = SetPose.Request()
-		request.entity = Entity(name='high_level_robosub')
 		request.pose = pose
 
 		self.pose_client.call_async(request)
@@ -83,3 +83,17 @@ def main(args=None):
 
 if __name__ == '__main__':
 	main()
+
+'''
+gz service -s /world/pool/set_pose --reqtype gz.msgs.Pose --reptype gz.msgs.Boolean --timeout 20000 --req '
+	name: "high_level_robosub", 
+	position: { x: 3.2, y: -1.5, z: 1.1 }, 
+	orientation: { x: 0.1, y: 0.2, z: 0.3, w: 0.9 }
+'
+
+gz topic --topic /model/high_level_robosub/pose --msgtype gz.msgs.Pose --pub '
+	name: "high_level_robosub", 
+	position: { x: 3.2, y: -1.5, z: 1.1 },
+    orientation: { x: 0.1, y: 0.2, z: 0.3, w: 0.9 }
+'
+'''
